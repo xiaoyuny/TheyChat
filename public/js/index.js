@@ -1,5 +1,31 @@
 const socket = io();
 
+function scrollToBottom() {
+  // selectors
+  const messages = document.getElementById('messages');
+  const newMessage = messages.lastChild;
+  // heights
+  const clientHeight = messages.clientHeight;
+  const scrollTop = messages.scrollTop;
+  const scrollHeight = messages.scrollHeight;
+  const newMessageHeight = newMessage.offsetHeight;
+  let lastMessageHeight = 0;
+
+  if (newMessage.previousSibling) {
+    lastMessageHeight = newMessage.previousSibling.offsetHeight;
+  }
+
+  if (
+    clientHeight + scrollTop + newMessageHeight + lastMessageHeight >=
+    scrollHeight
+  ) {
+    messages.scrollTo(
+      0,
+      document.body.scrollHeight || document.documentElement.scrollHeight
+    );
+  }
+}
+
 socket.on('connect', function() {
   console.log('Connected to server.');
 });
@@ -12,36 +38,59 @@ socket.on('newMessage', function(message) {
   const formattedTime = moment(message.createdAt).format('hh:mm a');
   const list = document.getElementById('messages');
   const li = document.createElement('li');
-  li.appendChild(
-    document.createTextNode(`${formattedTime} ${message.from}: ${message.text}`)
-  );
-  list.appendChild(li);
-});
 
-// socket.emit(
-//   'createMessage',
-//   {
-//     from: 'Frank',
-//     text: 'Hi'
-//   },
-//   function(message) {
-//     console.log(message);
-//   }
-// );
+  const from = document.createElement('p');
+  from.appendChild(document.createTextNode(`${message.from}`));
+  from.classList.add('display-inline');
+  from.classList.add('user-name');
+
+  const time = document.createElement('p');
+  time.appendChild(document.createTextNode(`${formattedTime}`));
+  time.classList.add('display-inline');
+  time.classList.add('timestamp');
+
+  const content = document.createElement('p');
+  content.appendChild(document.createTextNode(`${message.text}`));
+  content.classList.add('content');
+
+  li.appendChild(from);
+  li.appendChild(time);
+  li.appendChild(document.createElement('br'));
+  li.appendChild(content);
+  list.appendChild(li);
+
+  scrollToBottom();
+});
 
 socket.on('newLocationMessage', function(message) {
   const formattedTime = moment(message.createdAt).format('hh:mm a');
   const list = document.getElementById('messages');
   const a = document.createElement('a');
   const li = document.createElement('li');
+  const p = document.createElement('p');
+
+  const from = document.createElement('p');
+  from.appendChild(document.createTextNode(`${message.from}`));
+  from.classList.add('display-inline');
+  from.classList.add('user-name');
+
+  const time = document.createElement('p');
+  time.appendChild(document.createTextNode(`${formattedTime}`));
+  time.classList.add('display-inline');
+  time.classList.add('timestamp');
 
   a.appendChild(document.createTextNode('My current location'));
-  li.appendChild(document.createTextNode(`${formattedTime} `));
-  li.appendChild(document.createTextNode(`${message.from}: `));
+  li.appendChild(from);
+  li.appendChild(time);
+  li.appendChild(document.createElement('br'));
   a.setAttribute('href', message.url);
   a.setAttribute('target', '_blank');
-  li.appendChild(a);
+  p.classList.add('content');
+  p.appendChild(a);
+  li.appendChild(p);
   list.appendChild(li);
+
+  scrollToBottom();
 });
 
 document.getElementById('message-form').addEventListener('submit', function(e) {
@@ -56,7 +105,6 @@ document.getElementById('message-form').addEventListener('submit', function(e) {
       text: messageTextbox.value
     },
     function(message) {
-      console.log(message);
       messageTextbox.value = '';
     }
   );

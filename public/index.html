@@ -21,7 +21,7 @@
           <input
             type="text"
             name="message"
-            placeholder="Enter your message"
+            placeholder="Enter your message here"
             autofocus
             autocomplete="off"
           />
@@ -31,6 +31,10 @@
         <button id="send-location">Send Location</button>
       </div>
     </div>
+
+    <script id="message-template" type="text/template">
+      <p>{{ text }}</p>
+    </script>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/index.js"></script>

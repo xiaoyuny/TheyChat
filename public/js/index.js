@@ -9,9 +9,12 @@ socket.on('disconnect', function() {
 });
 
 socket.on('newMessage', function(message) {
+  const formattedTime = moment(message.createdAt).format('hh:mm a');
   const list = document.getElementById('messages');
   const li = document.createElement('li');
-  li.appendChild(document.createTextNode(`${message.from}: ${message.text}`));
+  li.appendChild(
+    document.createTextNode(`${formattedTime} ${message.from}: ${message.text}`)
+  );
   list.appendChild(li);
 });
 
@@ -27,11 +30,13 @@ socket.on('newMessage', function(message) {
 // );
 
 socket.on('newLocationMessage', function(message) {
+  const formattedTime = moment(message.createdAt).format('hh:mm a');
   const list = document.getElementById('messages');
   const a = document.createElement('a');
   const li = document.createElement('li');
 
   a.appendChild(document.createTextNode('My current location'));
+  li.appendChild(document.createTextNode(`${formattedTime} `));
   li.appendChild(document.createTextNode(`${message.from}: `));
   a.setAttribute('href', message.url);
   a.setAttribute('target', '_blank');

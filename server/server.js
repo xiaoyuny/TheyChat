@@ -6,11 +6,14 @@ const socketIO = require('socket.io');
 const { generateMessage, generateLocationMessage } = require('./utils/message');
 const { isRealString } = require('./utils/validation');
 const { decodeParams } = require('./utils/decodeParams');
+const { Users } = require('./utils/users');
+
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
+const users = new Users();
 
 app.use(express.static(publicPath));
 
@@ -22,15 +25,18 @@ io.on('connection', socket => {
     const room = decodeParams(params, 'room');
 
     if (!isRealString(name) || !isRealString(room)) {
-      callback('Name and room name are required.');
+      return callback('Name and room name are required.');
     }
 
     socket.join(room);
+    users.removeUser(socket.id);
+    users.addUser(socket.id, name, room);
     // socket.leave(room);
 
     // io.emit - everyone connected -> io.to(room).emit
     // socket.broadcast.emit - everyone but the current user ->socket.broadcast.to(room).emit
     // socket.emit - specifially to one user -> socket.emit
+    io.to(room).emit('updateUserList', users.getUserList(room));
 
     socket.emit(
       'newMessage',
@@ -58,7 +64,15 @@ io.on('connection', socket => {
   });
 
   socket.on('disconnect', () => {
-    console.log('Disconnected from server.');
+    const user = users.removeUser(socket.id);
+
+    if (user) {
+      io.to(user.room).emit('UpdateUserList', users.getUserList(user.room));
+      io.to(user.room).emit(
+        'newMessage',
+        generateMessage('Admin', `${user.name} has left the room.`)
+      );
+    }
   });
 });
 

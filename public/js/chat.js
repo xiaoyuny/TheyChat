@@ -43,6 +43,17 @@ socket.on('disconnect', function() {
   console.log('Disconnected from server.');
 });
 
+socket.on('updateUserList', function(users) {
+  const userList = document.getElementById('user-list');
+  userList.innerHTML = '';
+
+  users.forEach(function(user) {
+    const li = document.createElement('li');
+    li.appendChild(document.createTextNode(user));
+    userList.appendChild(li);
+  });
+});
+
 socket.on('newMessage', function(message) {
   const formattedTime = moment(message.createdAt).format('hh:mm a');
   const list = document.getElementById('messages');

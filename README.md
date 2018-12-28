@@ -1,6 +1,6 @@
 # TheyChat
 
-![Live Link](https://they-chat.herokuapp.com)
+[Live Link](https://they-chat.herokuapp.com)
 
 ## Background and Overview
 

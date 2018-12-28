@@ -40,7 +40,10 @@ io.on('connection', socket => {
 
     socket.emit(
       'newMessage',
-      generateMessage('Admin', `Hey ${name}, Welcome to the chat app`)
+      generateMessage(
+        'Admin',
+        `Hey ${name}, welcome to TheyChat! You're currently in room ${room}.`
+      )
     );
 
     socket.broadcast
